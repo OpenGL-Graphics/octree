@@ -5,4 +5,8 @@ A simple octree with good commenting for learning how octrees work. Blog post in
 
 Usage
 ============
-make && ./octree
+
+```terminal
+$ mkdir build && cd build
+$ cmake .. && make -j && ./main
+```
