@@ -8,8 +8,7 @@
 
 // Used for testing
 std::vector<glm::vec3> points;
-Octree *octree;
-// OctreePoint *octreePoints;
+Octree octree;
 glm::vec3 qmin, qmax;
 
 float rand11() {
@@ -36,7 +35,7 @@ bool naivePointInBox(const glm::vec3& point, const glm::vec3& bmin, const glm::v
 void init() {
 	// Create a new Octree centered at the origin
 	// with physical dimension 2x2x2
-	octree = new Octree(glm::vec3(0,0,0), glm::vec3(1,1,1));
+	octree = Octree(glm::vec3(0,0,0), glm::vec3(1,1,1));
 
 	// Create a bunch of random points
 	const int nPoints = 1 * 1000 * 1000;
@@ -46,13 +45,8 @@ void init() {
 	printf("Created %ld points\n", points.size()); fflush(stdout);
 
 	// Insert the points into the octree
-	// octreePoints = new OctreePoint[nPoints];
-  glm::vec3 octreePoints[nPoints];
-
 	for(int i=0; i<nPoints; ++i) {
-		// octreePoints[i].setPosition(points[i]);
-		// octree->insert(octreePoints + i);
-		octree->insert(points[i]);
+		octree.insert(points[i]);
 	}
 	printf("Inserted points to octree\n"); fflush(stdout);
 
@@ -88,14 +82,10 @@ void testOctree() {
 	double start = stopwatch();
 
 	std::vector<glm::vec3> results;
-  ///
-  int n_calls = 0;
-  ///
-	octree->getPointsInsideBox(qmin, qmax, results, n_calls);
+	octree.getPointsInsideBox(qmin, qmax, results);
 
 	double T = stopwatch() - start;
 	printf("testOctree found %ld points in %.5f sec.\n", results.size(), T);
-  printf("# of recursive calls: %d\n", n_calls);
 }
 
 
