@@ -13,8 +13,8 @@ namespace brandonpelfrey {
 	class Octree {
 		// Physical position/size. This implicitly defines the bounding 
 		// box of this node
-		Vec3 origin;         //! The physical center of this node
-		Vec3 halfDimension;  //! Half the width/height/depth of this node
+    glm::vec3 origin;         //! The physical center of this node
+    glm::vec3 halfDimension;  //! Half the width/height/depth of this node
 
 		// The tree has up to eight children and can additionally store
 		// a point, though in many applications only, the leaves will store data.
@@ -31,7 +31,7 @@ namespace brandonpelfrey {
 		 */
 
 		public:
-		Octree(const Vec3& origin, const Vec3& halfDimension) 
+		Octree(const glm::vec3& origin, const glm::vec3& halfDimension) 
 			: origin(origin), halfDimension(halfDimension), data(NULL) {
 				// Initially, there are no children
 				for(int i=0; i<8; ++i) 
@@ -50,7 +50,7 @@ namespace brandonpelfrey {
 		}
 
 		// Determine which octant of the tree would contain 'point'
-		int getOctantContainingPoint(const Vec3& point) const {
+		int getOctantContainingPoint(const glm::vec3& point) const {
 			int oct = 0;
 			if(point.x >= origin.x) oct |= 4;
 			if(point.y >= origin.y) oct |= 2;
@@ -93,7 +93,7 @@ namespace brandonpelfrey {
 					// child octant.
 					for(int i=0; i<8; ++i) {
 						// Compute new bounding box for this child
-						Vec3 newOrigin = origin;
+            glm::vec3 newOrigin = origin;
 						newOrigin.x += halfDimension.x * (i&4 ? .5f : -.5f);
 						newOrigin.y += halfDimension.y * (i&2 ? .5f : -.5f);
 						newOrigin.z += halfDimension.z * (i&1 ? .5f : -.5f);
@@ -103,6 +103,7 @@ namespace brandonpelfrey {
 					// Re-insert the old point, and insert this new point
 					// (We wouldn't need to insert from the root, because we already
 					// know it's guaranteed to be in this section of the tree)
+          // TODO: no need for recursive call (child.data = NULL in ctor)
 					children[getOctantContainingPoint(oldPoint->getPosition())]->insert(oldPoint);
 					children[getOctantContainingPoint(point->getPosition())]->insert(point);
 				}
@@ -117,12 +118,14 @@ namespace brandonpelfrey {
 		// This is a really simple routine for querying the tree for points
 		// within a bounding box defined by min/max points (bmin, bmax)
 		// All results are pushed into 'results'
-		void getPointsInsideBox(const Vec3& bmin, const Vec3& bmax, std::vector<OctreePoint*>& results) {
+		void getPointsInsideBox(const glm::vec3& bmin, const glm::vec3& bmax, std::vector<OctreePoint*>& results, int& n_calls) {
 			// If we're at a leaf node, just see if the current data point is inside
 			// the query bounding box
 			if(isLeafNode()) {
 				if(data!=NULL) {
-					const Vec3& p = data->getPosition();
+          // TODO: if point inside bbox
+					const glm::vec3& p = data->getPosition();
+          n_calls++;
 					if(p.x>bmax.x || p.y>bmax.y || p.z>bmax.z) return;
 					if(p.x<bmin.x || p.y<bmin.y || p.z<bmin.z) return;
 					results.push_back(data);
@@ -132,17 +135,19 @@ namespace brandonpelfrey {
 				// the query bounding box lies outside the octants of this node.
 				for(int i=0; i<8; ++i) {
 					// Compute the min/max corners of this child octant
-					Vec3 cmax = children[i]->origin + children[i]->halfDimension;
-					Vec3 cmin = children[i]->origin - children[i]->halfDimension;
+          glm::vec3 cmax = children[i]->origin + children[i]->halfDimension;
+          glm::vec3 cmin = children[i]->origin - children[i]->halfDimension;
 
 					// If the query rectangle is outside the child's bounding box, 
 					// then continue
+          // TODO: intersection between 2 bboxes (see mozilla website)
 					if(cmax.x<bmin.x || cmax.y<bmin.y || cmax.z<bmin.z) continue;
 					if(cmin.x>bmax.x || cmin.y>bmax.y || cmin.z>bmax.z) continue;
 
 					// At this point, we've determined that this child is intersecting 
 					// the query bounding box
-					children[i]->getPointsInsideBox(bmin,bmax,results);
+          n_calls++;
+					children[i]->getPointsInsideBox(bmin,bmax,results, n_calls);
 				} 
 			}
 		}
