@@ -3,22 +3,24 @@
 #include <vector>
 #include <algorithm>
 
-#include "Octree.h"
-#include "Stopwatch.h"
-
-using namespace brandonpelfrey;
+#include "octree.hpp"
+#include "stopwatch.hpp"
 
 // Used for testing
 std::vector<glm::vec3> points;
 Octree *octree;
-OctreePoint *octreePoints;
+// OctreePoint *octreePoints;
 glm::vec3 qmin, qmax;
 
-float rand11() // Random number between [-1,1]
-{ return -1.f + (2.f*rand()) * (1.f / (float) RAND_MAX); }
+float rand11() {
+  // Random number between [-1,1]
+  return -1.f + (2.f*rand()) * (1.f / (float) RAND_MAX);
+}
 
-glm::vec3 randVec3() // Random vector with components in the range [-1,1]
-{ return glm::vec3(rand11(), rand11(), rand11()); }
+glm::vec3 randVec3() {
+  // Random vector with components in the range [-1,1]
+  return glm::vec3(rand11(), rand11(), rand11());
+}
 
 // Determine if 'point' is within the bounding box [bmin, bmax]
 bool naivePointInBox(const glm::vec3& point, const glm::vec3& bmin, const glm::vec3& bmax) {
@@ -44,10 +46,13 @@ void init() {
 	printf("Created %ld points\n", points.size()); fflush(stdout);
 
 	// Insert the points into the octree
-	octreePoints = new OctreePoint[nPoints];
+	// octreePoints = new OctreePoint[nPoints];
+  glm::vec3 octreePoints[nPoints];
+
 	for(int i=0; i<nPoints; ++i) {
-		octreePoints[i].setPosition(points[i]);
-		octree->insert(octreePoints + i);
+		// octreePoints[i].setPosition(points[i]);
+		// octree->insert(octreePoints + i);
+		octree->insert(points[i]);
 	}
 	printf("Inserted points to octree\n"); fflush(stdout);
 
@@ -82,7 +87,7 @@ void testNaive() {
 void testOctree() {
 	double start = stopwatch();
 
-	std::vector<OctreePoint*> results;
+	std::vector<glm::vec3> results;
   ///
   int n_calls = 0;
   ///

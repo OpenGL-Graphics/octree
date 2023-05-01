@@ -11,5 +11,6 @@ set(CMAKE_BUILD_TYPE Release)
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 
 # main
-add_executable(main src/main.cpp)
+file(GLOB SRC "src/*.cpp")
+add_executable(main ${SRC})
 target_include_directories(main PRIVATE include)
